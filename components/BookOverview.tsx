@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import BookCover from "./BookCover";
 
 interface Props extends Book {
   userId: string;
@@ -50,6 +51,33 @@ const BookOverview = ({
         </div>
 
         <p className="book-description">{description}</p>
+
+        {/* {user && (
+          <BorrowBook
+            bookId={id}
+            userId={userId}
+            borrowingEligibility={borrowingEligibility}
+          />
+        )} */}
+      </div>
+
+      <div className="relative flex flex-1 justify-center">
+        <div className="relative">
+          <BookCover
+            variant="wide"
+            className="z-10"
+            coverColor={coverColor}
+            coverImage={coverUrl}
+          />
+
+          <div className="absolute left-16 top-10 rotate-12 opacity-40 max-sm:hidden">
+            <BookCover
+              variant="wide"
+              coverColor={coverColor}
+              coverImage={coverUrl}
+            />
+          </div>
+        </div>
       </div>
     </section>
   );
