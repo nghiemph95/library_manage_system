@@ -16,7 +16,7 @@ const Header = () => {
             action={async () => {
               "use server";
 
-              await signOut();
+              // await signOut();
             }}
             className="mb-10"
           >
