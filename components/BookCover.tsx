@@ -3,7 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-// import BookCoverSvg from "@/components/BookCoverSvg";
+import BookCoverSvg from "./BookCoverSvg";
 // import { IKImage } from "imagekitio-next";
 // import config from "@/lib/config";
 
@@ -38,8 +38,8 @@ const BookCover = ({
         className
       )}
     >
-      {/* <BookCoverSvg coverColor={coverColor} /> */}
-      BOOK SIDE SVG
+      <BookCoverSvg coverColor={coverColor} />
+
       <div
         className="absolute z-10"
         style={{ left: "12%", width: "87.5%", height: "88%" }}
