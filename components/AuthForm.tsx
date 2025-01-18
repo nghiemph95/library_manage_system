@@ -23,8 +23,8 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FIELD_NAMES, FIELD_TYPES } from "@/constants";
-import FileUpload from "@/components/FileUpload";
-import { toast } from "@/hooks/use-toast";
+// import FileUpload from "@/components/FileUpload";
+// import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 interface Props<T extends FieldValues> {
