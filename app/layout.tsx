@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
+import { Toaster } from "@/components/ui/toaster";
 import localFont from "next/font/local";
 
 const ibmPlexSans = localFont({
@@ -32,6 +32,8 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         className={`${ibmPlexSans.className} ${bebasNeue.variable} antialiased`}
       >
         {children}
+
+        <Toaster />
       </body>
     </html>
   );
