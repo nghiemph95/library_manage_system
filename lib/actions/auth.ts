@@ -8,7 +8,7 @@ import { signIn } from "@/auth";
 import { headers } from "next/headers";
 import ratelimit from "@/lib/ratelimit";
 import { redirect } from "next/navigation";
-// import { workflowClient } from "@/lib/workflow";
+import { workflowClient } from "@/lib/workflow";
 import config from "@/lib/config";
 
 export const signInWithCredentials = async (
@@ -60,6 +60,7 @@ export const signUp = async (params: AuthCredentials) => {
   const hashedPassword = await hash(password, 10);
 
   try {
+    // Create user
     await db.insert(users).values({
       fullName,
       email,
@@ -68,14 +69,16 @@ export const signUp = async (params: AuthCredentials) => {
       universityCard,
     });
 
-    // await workflowClient.trigger({
-    //   url: `${config.env.prodApiEndpoint}/api/workflows/onboarding`,
-    //   body: {
-    //     email,
-    //     fullName,
-    //   },
-    // });
+    // Trigger onboarding workflow
+    await workflowClient.trigger({
+      url: `${config.env.prodApiEndpoint}/api/workflows/onboarding`,
+      body: {
+        email,
+        fullName,
+      },
+    });
 
+    // Sign in user
     await signInWithCredentials({ email, password });
 
     return { success: true };
