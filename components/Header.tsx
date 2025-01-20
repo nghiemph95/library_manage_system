@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Session } from "next-auth";
 // import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 
 const Header = ({ session }: { session: Session }) => {
   // const pathname = usePathname();
@@ -17,7 +17,7 @@ const Header = ({ session }: { session: Session }) => {
       </Link>
 
       <ul className="flex flex-row items-center gap-8">
-        <li>
+        {/* <li>
           <form
             action={async () => {
               "use server";
@@ -28,7 +28,8 @@ const Header = ({ session }: { session: Session }) => {
           >
             <Button>Logout</Button>
           </form>
-        </li>
+        </li> */}
+
         <li>
           <Link href="/library" className="text-light-200">
             Library
@@ -38,7 +39,9 @@ const Header = ({ session }: { session: Session }) => {
         <li>
           <Link href="/my-profile">
             <Avatar>
-              <AvatarFallback>{session?.user?.name}</AvatarFallback>
+              <AvatarFallback className="bg-amber-100">
+                {getInitials(session?.user?.name || "IN")}
+              </AvatarFallback>
             </Avatar>
           </Link>
         </li>
