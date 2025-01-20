@@ -35,10 +35,6 @@ const Header = ({ session }: { session: Session }) => {
           </Link>
         </li>
 
-        {/* <li>
-          <Link href="/library" className={cn(inputs: "text-base cursor-pointer capitalize", pathname === "/library" ? "text-light-200": "text-light-100")}>Libray</Link>
-        </li> */}
-
         <li>
           <Link href="/my-profile">
             <Avatar>
