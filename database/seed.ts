@@ -25,6 +25,7 @@ const uploadToImageKit = async (
   folder: string
 ) => {
   try {
+    console.log("Uploading image to ImageKit...");
     const response = await imagekit.upload({
       file: url,
       fileName,
