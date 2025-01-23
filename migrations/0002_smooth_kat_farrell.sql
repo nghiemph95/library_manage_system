@@ -1,0 +1,1 @@
+ALTER TABLE "books" ALTER COLUMN "video_url" SET NOT NULL;
