@@ -22,12 +22,14 @@ const BookOverview = async ({
   id,
   userId,
 }: Props) => {
+  // Fetch the user from the database
   const [user] = await db
     .select()
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
 
+  // Check if the user is eligible to borrow the book
   const borrowingEligibility = {
     isEligible: availableCopies > 0 && user?.status === "APPROVED",
     message:
