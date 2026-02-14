@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { adminSideBarLinks } from "@/constants";
 import Link from "next/link";
@@ -8,8 +9,22 @@ import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Session } from "next-auth";
 
-const Sidebar = ({ session }: { session: Session }) => {
+const ACCOUNT_REQUESTS_ROUTE = "/admin/account-requests";
+
+const Sidebar = ({
+  session,
+  pendingRequestsCount = 0,
+}: {
+  session: Session;
+  pendingRequestsCount?: number;
+}) => {
   const pathname = usePathname();
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+  const showBadge = pendingRequestsCount > 0;
+
+  useEffect(() => {
+    setNavigatingTo(null);
+  }, [pathname]);
 
   return (
     <div className="admin-sidebar">
@@ -31,26 +46,57 @@ const Sidebar = ({ session }: { session: Session }) => {
                 pathname.includes(link.route) &&
                 link.route.length > 1) ||
               pathname === link.route;
+            const isAccountRequests = link.route === ACCOUNT_REQUESTS_ROUTE;
+
+            const isActive =
+              (isSelected && !navigatingTo) || navigatingTo === link.route;
 
             return (
-              <Link href={link.route} key={link.route}>
+              <Link
+                href={link.route}
+                key={link.route}
+                onClick={() => setNavigatingTo(link.route)}
+                prefetch={true}
+              >
                 <div
                   className={cn(
                     "link",
-                    isSelected && "bg-primary-admin shadow-sm"
+                    isActive && "bg-primary-admin shadow-sm",
+                    navigatingTo === link.route && "admin-sidebar__link-loading"
                   )}
                 >
-                  <div className="relative size-5">
+                  <div className="relative size-5 shrink-0">
                     <Image
                       src={link.img}
                       alt="icon"
                       fill
-                      className={`${isSelected ? "brightness-0 invert" : ""}  object-contain`}
+                      className={`${isActive ? "brightness-0 invert" : ""} object-contain`}
                     />
+                    {isAccountRequests && showBadge && (
+                      <span
+                        className="admin-sidebar__badge-dot md:hidden"
+                        aria-hidden
+                      />
+                    )}
                   </div>
 
-                  <p className={cn(isSelected ? "text-white" : "text-dark")}>
-                    {link.text}
+                  <p
+                    className={cn(
+                      "flex items-center gap-2 min-w-0",
+                      isActive ? "text-white" : "text-dark"
+                    )}
+                  >
+                    <span className="truncate">{link.text}</span>
+                    {isAccountRequests && showBadge && (
+                      <span
+                        className="admin-sidebar__badge"
+                        title={`${pendingRequestsCount} pending request${pendingRequestsCount !== 1 ? "s" : ""}`}
+                      >
+                        {pendingRequestsCount > 99
+                          ? "99+"
+                          : pendingRequestsCount}
+                      </span>
+                    )}
                   </p>
                 </div>
               </Link>

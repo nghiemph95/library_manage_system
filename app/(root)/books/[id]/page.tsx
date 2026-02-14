@@ -1,17 +1,18 @@
 import React from "react";
 import { db } from "@/database/drizzle";
 import { books } from "@/database/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import BookOverview from "@/components/BookOverview";
 import BookVideo from "@/components/BookVideo";
+import BookList from "@/components/BookList";
+import BookCard from "@/components/BookCard";
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const id = (await params).id;
   const session = await auth();
 
-  // Fetch data based on id
   const [bookDetails] = await db
     .select()
     .from(books)
@@ -19,6 +20,12 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     .limit(1);
 
   if (!bookDetails) redirect("/404");
+
+  const similarBooks = (await db
+    .select()
+    .from(books)
+    .where(and(eq(books.genre, bookDetails.genre), ne(books.id, id)))
+    .limit(6)) as Book[];
 
   return (
     <>
@@ -40,9 +47,24 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
               ))}
             </div>
           </section>
-        </div>
 
-        {/*  SIMILAR*/}
+          {similarBooks.length > 0 && (
+            <section className="mt-16 flex flex-col gap-7">
+              <h3>Similar Books</h3>
+              {similarBooks.length === 1 ? (
+                <ul className="book-list mt-4">
+                  <BookCard key={similarBooks[0].id} {...similarBooks[0]} />
+                </ul>
+              ) : (
+                <BookList
+                  title=""
+                  books={similarBooks}
+                  containerClassName=""
+                />
+              )}
+            </section>
+          )}
+        </div>
       </div>
     </>
   );

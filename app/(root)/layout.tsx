@@ -12,28 +12,39 @@ const Layout = async ({ children }: { children: ReactNode }) => {
 
   if (!session) redirect("/sign-in");
 
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, session?.user?.id!))
+    .limit(1);
+
   after(async () => {
-    if (!session?.user?.id) return;
+    if (!user?.id) return;
 
-    const user = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, session?.user?.id))
-      .limit(1);
-
-    if (user[0].lastActivityDate === new Date().toISOString().slice(0, 10))
+    if (user.lastActivityDate === new Date().toISOString().slice(0, 10))
       return;
 
     await db
       .update(users)
       .set({ lastActivityDate: new Date().toISOString().slice(0, 10) })
-      .where(eq(users.id, session?.user?.id));
+      .where(eq(users.id, user.id));
   });
 
   return (
     <main className="root-container">
       <div className="mx-auto max-w-7xl">
-        <Header session={session} />
+        <Header
+          session={session}
+          user={
+            user
+              ? {
+                  fullName: user.fullName,
+                  universityCard: user.universityCard,
+                  role: user.role ?? undefined,
+                }
+              : undefined
+          }
+        />
 
         <div className="mt-20 pb-20">{children}</div>
       </div>

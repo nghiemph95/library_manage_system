@@ -5,9 +5,10 @@ import { redirect } from "next/navigation";
 import "@/styles/admin.css";
 import Sidebar from "@/components/admin/Sidebar";
 import Header from "@/components/admin/Header";
+import AdminPageTransition from "@/components/admin/AdminPageTransition";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, count } from "drizzle-orm";
 
 const Layout = async ({ children }: { children: ReactNode }) => {
   const session = await auth();
@@ -23,13 +24,20 @@ const Layout = async ({ children }: { children: ReactNode }) => {
 
   if (!isAdmin) redirect("/");
 
+  const [pendingResult] = await db
+    .select({ count: count() })
+    .from(users)
+    .where(and(eq(users.status, "PENDING"), eq(users.role, "USER")));
+
+  const pendingRequestsCount = pendingResult?.count ?? 0;
+
   return (
     <main className="flex min-h-screen w-full flex-row">
-      <Sidebar session={session} />
+      <Sidebar session={session} pendingRequestsCount={pendingRequestsCount} />
 
       <div className="admin-container">
         <Header session={session} />
-        {children}
+        <AdminPageTransition>{children}</AdminPageTransition>
       </div>
     </main>
   );

@@ -1,4 +1,5 @@
 import { Session } from "next-auth";
+import PortalSwitch from "@/components/PortalSwitch";
 
 const Header = ({ session }: { session: Session }) => {
   return (
@@ -12,7 +13,7 @@ const Header = ({ session }: { session: Session }) => {
         </p>
       </div>
 
-      {/*<p>Search</p>*/}
+      <PortalSwitch isAdmin={true} variant="admin" />
     </header>
   );
 };

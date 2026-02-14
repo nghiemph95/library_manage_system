@@ -2,9 +2,9 @@
 
 import { IKImage, ImageKitProvider, IKUpload, IKVideo } from "imagekitio-next";
 import config from "@/lib/config";
-import ImageKit from "imagekit";
 import { useRef, useState } from "react";
 import Image from "next/image";
+import { Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -60,6 +60,7 @@ const FileUpload = ({
     filePath: value ?? null,
   });
   const [progress, setProgress] = useState(0);
+  const isUploading = progress > 0;
 
   const styles = {
     button:
@@ -82,6 +83,7 @@ const FileUpload = ({
 
   const onSuccess = (res: any) => {
     setFile(res);
+    setProgress(0);
     onFileChange(res.filePath);
 
     toast({
@@ -139,34 +141,51 @@ const FileUpload = ({
       />
 
       <button
-        className={cn("upload-btn", styles.button)}
+        type="button"
+        className={cn(
+          "upload-btn",
+          styles.button,
+          isUploading && "pointer-events-none opacity-70"
+        )}
         onClick={(e) => {
           e.preventDefault();
-
           if (ikUploadRef.current) {
             // @ts-ignore
             ikUploadRef.current?.click();
           }
         }}
+        disabled={isUploading}
       >
-        <Image
-          src="/icons/upload.svg"
-          alt="upload-icon"
-          width={20}
-          height={20}
-          className="object-contain"
-        />
+        {isUploading ? (
+          <Loader2
+            className="size-5 shrink-0 animate-spin object-contain"
+            aria-hidden
+          />
+        ) : (
+          <Image
+            src="/icons/upload.svg"
+            alt="upload-icon"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
+        )}
 
-        <p className={cn("text-base", styles.placeholder)}>{placeholder}</p>
+        <p className={cn("text-base", styles.placeholder)}>
+          {isUploading ? `Uploading... ${progress}%` : placeholder}
+        </p>
 
-        {file && (
+        {file && !isUploading && (
           <p className={cn("upload-filename", styles.text)}>{file.filePath}</p>
         )}
       </button>
 
-      {progress > 0 && progress !== 100 && (
+      {isUploading && (
         <div className="w-full rounded-full bg-green-200">
-          <div className="progress" style={{ width: `${progress}%` }}>
+          <div
+            className="progress transition-[width] duration-300"
+            style={{ width: `${progress}%` }}
+          >
             {progress}%
           </div>
         </div>

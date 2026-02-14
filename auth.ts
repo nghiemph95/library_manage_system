@@ -24,10 +24,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (user.length === 0) return null;
 
-        const isPasswordValid = await compare(
-          credentials.password.toString(),
-          user[0].password
-        );
+        const plainPassword = credentials.password.toString().trim();
+        const storedHash = String(user[0].password ?? "");
+        if (!storedHash.startsWith("$2a$") && !storedHash.startsWith("$2b$")) {
+          return null;
+        }
+        const isPasswordValid = await compare(plainPassword, storedHash);
 
         if (!isPasswordValid) return null;
 

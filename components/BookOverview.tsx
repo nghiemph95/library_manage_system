@@ -29,9 +29,12 @@ const BookOverview = async ({
     .where(eq(users.id, userId))
     .limit(1);
 
-  // Check if the user is eligible to borrow the book
+  // Admin can always borrow; other users need APPROVED status
+  const canBorrow =
+    availableCopies > 0 &&
+    (user?.role === "ADMIN" || user?.status === "APPROVED");
   const borrowingEligibility = {
-    isEligible: availableCopies > 0 && user?.status === "APPROVED",
+    isEligible: canBorrow,
     message:
       availableCopies <= 0
         ? "Book is not available"
