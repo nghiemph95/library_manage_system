@@ -5,14 +5,17 @@ import { Button } from "@/components/ui/button";
 import { returnBook } from "@/lib/actions/book";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, RotateCcw } from "lucide-react";
 
 export default function ReturnBookButton({
   borrowRecordId,
   userId,
+  variant = "default",
 }: {
   borrowRecordId: string;
   userId: string;
+  /** "default" = full-width green; "square" = red square next to receipt */
+  variant?: "default" | "square";
 }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -32,22 +35,37 @@ export default function ReturnBookButton({
     }
   };
 
+  if (variant === "square") {
+    return (
+      <button
+        type="button"
+        className="btn-return-inline"
+        onClick={handleReturn}
+        disabled={loading}
+      >
+        {loading ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          <RotateCcw />
+        )}
+        {loading ? "Returning..." : "Return book"}
+      </button>
+    );
+  }
+
   return (
     <Button
-      variant="outline"
-      size="sm"
-      className="mt-2 w-full border-light-100/30 text-light-100"
+      type="button"
+      className="book-overview_btn-return mt-2 w-full"
       onClick={handleReturn}
       disabled={loading}
     >
       {loading ? (
-        <>
-          <Loader2 className="mr-1 size-4 animate-spin" />
-          Returning...
-        </>
+        <Loader2 className="size-5 animate-spin" />
       ) : (
-        "I've returned this book"
+        <RotateCcw className="size-5" />
       )}
+      {loading ? "Returning..." : "Return this book"}
     </Button>
   );
 }

@@ -1,12 +1,19 @@
 import BookList from "@/components/BookList";
 import BookOverview from "@/components/BookOverview";
+import WelcomeIntroWrapper from "@/components/WelcomeIntroWrapper";
 import { db } from "@/database/drizzle";
-import { books, users } from "@/database/schema";
+import { books } from "@/database/schema";
 import { auth } from "@/auth";
 import { desc } from "drizzle-orm";
 
-const Home = async () => {
+interface HomeProps {
+  searchParams: Promise<{ welcome?: string }>;
+}
+
+const Home = async ({ searchParams }: HomeProps) => {
   const session = await auth();
+  const params = await searchParams;
+  const showWelcomeIntro = params?.welcome === "1";
 
   const latestBooks = (await db
     .select()
@@ -15,7 +22,7 @@ const Home = async () => {
     .orderBy(desc(books.createdAt))) as Book[];
 
   return (
-    <>
+    <WelcomeIntroWrapper showIntro={showWelcomeIntro}>
       <BookOverview {...latestBooks[0]} userId={session?.user?.id as string} />
 
       <BookList
@@ -23,7 +30,7 @@ const Home = async () => {
         books={latestBooks.slice(1)}
         containerClassName="mt-28"
       />
-    </>
+    </WelcomeIntroWrapper>
   );
 };
 

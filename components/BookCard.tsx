@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import BookCover from "@/components/BookCover";
 import WishlistButton from "@/components/WishlistButton";
+import ReturnBookButton from "@/components/ReturnBookButton";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -82,13 +83,22 @@ const BookCard = ({
               </p>
             )}
           </div>
-          {borrowRecordId ? (
-            <Link href={`/books/${id}/receipt?recordId=${borrowRecordId}`}>
-              <Button className="book-btn w-full">Download receipt</Button>
-            </Link>
-          ) : (
-            <Button className="book-btn w-full" disabled>Download receipt</Button>
-          )}
+          <div className="book-card-actions">
+            {borrowRecordId ? (
+              <Link href={`/books/${id}/receipt?recordId=${borrowRecordId}`} className="w-full">
+                <Button className="book-btn w-full whitespace-nowrap">Download receipt</Button>
+              </Link>
+            ) : (
+              <Button className="book-btn w-full whitespace-nowrap" disabled>Download receipt</Button>
+            )}
+            {borrowRecordId && userId && (
+              <ReturnBookButton
+                borrowRecordId={borrowRecordId}
+                userId={userId}
+                variant="square"
+              />
+            )}
+          </div>
         </div>
       )}
 

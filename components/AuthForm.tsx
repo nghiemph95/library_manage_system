@@ -66,7 +66,7 @@ const AuthForm = <T extends FieldValues>({
           : "You have successfully signed up.",
       });
 
-      router.push("/");
+      router.push("/?welcome=1");
     } else {
       toast({
         title: `Error ${isSignIn ? "signing in" : "signing up"}`,
@@ -172,7 +172,7 @@ const AuthForm = <T extends FieldValues>({
                       description:
                         "You can browse the library. Want to try Admin? See the banner below or check My Profile.",
                     });
-                    router.push("/");
+                    router.push("/?welcome=1");
                   } else {
                     toast({
                       title: "Guest login failed",

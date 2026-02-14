@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/auth";
 import { auth } from "@/auth";
@@ -8,8 +9,6 @@ import { books, borrowRecords } from "@/database/schema";
 import { eq, and, desc } from "drizzle-orm";
 import dayjs from "dayjs";
 import BookCard from "@/components/BookCard";
-import ReturnBookButton from "@/components/ReturnBookButton";
-import Link from "next/link";
 import { ADMIN_DEMO_CREDENTIALS_LINK } from "@/constants";
 import config from "@/lib/config";
 
@@ -135,13 +134,7 @@ const MyProfilePage = async () => {
           <ul className="book-list mt-8">
             {borrowedBooks.map((book) => (
               <li key={book.id} className="flex flex-col items-center">
-                <BookCard {...book} />
-                {book.borrowRecordId && (
-                  <ReturnBookButton
-                    borrowRecordId={book.borrowRecordId}
-                    userId={userId}
-                  />
-                )}
+                <BookCard {...book} userId={userId} />
               </li>
             ))}
           </ul>
