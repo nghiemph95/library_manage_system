@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import Header from "@/components/Header";
+import GuestBanner from "@/components/GuestBanner";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -32,7 +33,7 @@ const Layout = async ({ children }: { children: ReactNode }) => {
 
   return (
     <main className="root-container">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto min-w-0 w-full max-w-7xl">
         <Header
           session={session}
           user={
@@ -46,7 +47,12 @@ const Layout = async ({ children }: { children: ReactNode }) => {
           }
         />
 
-        <div className="mt-20 pb-20">{children}</div>
+        <div className="mt-20 pb-20">
+          <div className="px-2">
+            <GuestBanner session={session} />
+          </div>
+          <div className="mt-4">{children}</div>
+        </div>
       </div>
     </main>
   );

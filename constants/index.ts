@@ -1,9 +1,16 @@
+/** Link tới nơi hiển thị demo Admin credentials (LinkedIn profile Nghiêm Phạm). */
+export const ADMIN_DEMO_CREDENTIALS_LINK =
+  "https://www.linkedin.com/in/nghiem-pham-b04868143/overlay/1770999004551/single-media-viewer/?profileId=ACoAACLVMjQBnP5RnQVBorJP4HoqAmwQ1rzta3U";
+
 export const navigationLinks = [
   {
     href: "/library",
     label: "Library",
   },
-
+  {
+    href: "/wishlist",
+    label: "Wishlist",
+  },
   {
     img: "/icons/user.svg",
     selectedImg: "/icons/user-fill.svg",

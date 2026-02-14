@@ -27,12 +27,15 @@ import { FIELD_NAMES, FIELD_TYPES } from "@/constants";
 import FileUpload from "@/components/FileUpload";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface Props<T extends FieldValues> {
   schema: ZodType<T>;
   defaultValues: T;
   onSubmit: (data: T) => Promise<{ success: boolean; error?: string }>;
   type: "SIGN_IN" | "SIGN_UP";
+  /** Khi set, hiện nút "Continue as Guest" (chỉ dùng khi type = SIGN_IN). */
+  onGuestLogin?: () => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthForm = <T extends FieldValues>({
@@ -40,8 +43,10 @@ const AuthForm = <T extends FieldValues>({
   schema,
   defaultValues,
   onSubmit,
+  onGuestLogin,
 }: Props<T>) => {
   const router = useRouter();
+  const [guestLoading, setGuestLoading] = useState(false);
 
   const isSignIn = type === "SIGN_IN";
 
@@ -139,6 +144,57 @@ const AuthForm = <T extends FieldValues>({
               "Sign Up"
             )}
           </Button>
+
+          {isSignIn && onGuestLogin && (
+            <div className="relative my-2">
+              <span className="bg-dark-200 absolute inset-0 flex items-center">
+                <span className="w-full border-t border-light-100/30" />
+              </span>
+              <p className="relative flex justify-center text-xs font-medium uppercase tracking-wide text-light-100">
+                <span className="bg-dark-200 px-2">or</span>
+              </p>
+            </div>
+          )}
+
+          {isSignIn && onGuestLogin && (
+            <Button
+              type="button"
+              variant="outline"
+              className="form-btn border border-light-100/40 bg-transparent text-light-100 hover:bg-white/10 hover:text-white"
+              disabled={guestLoading || form.formState.isSubmitting}
+              onClick={async () => {
+                setGuestLoading(true);
+                try {
+                  const result = await onGuestLogin();
+                  if (result.success) {
+                    toast({
+                      title: "Signed in as guest",
+                      description:
+                        "You can browse the library. Want to try Admin? See the banner below or check My Profile.",
+                    });
+                    router.push("/");
+                  } else {
+                    toast({
+                      title: "Guest login failed",
+                      description: result.error ?? "Try again or sign in with your account.",
+                      variant: "destructive",
+                    });
+                  }
+                } finally {
+                  setGuestLoading(false);
+                }
+              }}
+            >
+              {guestLoading ? (
+                <>
+                  <Loader2 className="size-5 animate-spin" aria-hidden />
+                  Continuing as guest...
+                </>
+              ) : (
+                "Continue as Guest"
+              )}
+            </Button>
+          )}
         </form>
       </Form>
 

@@ -1,5 +1,7 @@
 const config = {
   env: {
+    /** Email của guest user (dùng để nhận diện session guest). Set GUEST_EMAIL trong .env. */
+    guestEmail: process.env.GUEST_EMAIL ?? null,
     apiEndpoint: process.env.NEXT_PUBLIC_API_ENDPOINT!,
     prodApiEndpoint: process.env.NEXT_PUBLIC_PROD_API_ENDPOINT!,
     imagekit: {

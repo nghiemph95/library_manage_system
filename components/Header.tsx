@@ -25,17 +25,26 @@ const Header = ({ session, user }: { session: Session; user?: User }) => {
       </Link>
 
       <ul className="flex flex-row items-center gap-8">
-        <li>
-          {isAdmin ? (
+        {isAdmin && (
+          <li>
             <PortalSwitch isAdmin={true} />
-          ) : (
-            <Link
-              href="/library"
-              className="text-light-200 hover:text-light-100"
-            >
-              Library
-            </Link>
-          )}
+          </li>
+        )}
+        <li>
+          <Link
+            href="/library"
+            className="text-light-200 hover:text-light-100"
+          >
+            Library
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/wishlist"
+            className="text-light-200 hover:text-light-100"
+          >
+            Wishlist
+          </Link>
         </li>
 
         <li>

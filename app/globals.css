@@ -119,7 +119,7 @@
   }
 
   .book-overview_btn {
-    @apply mt-4 min-h-14 w-fit bg-primary text-dark-100 hover:bg-primary/90 max-md:w-full !important;
+    @apply mt-4 min-h-14 w-fit bg-primary font-bebas-neue text-xl text-dark-100 transition-transform duration-150 hover:bg-primary/90 active:scale-[0.98] max-md:w-full !important;
   }
 
   /* File Upload */
@@ -338,5 +338,22 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt-root,
+  .receipt-root * {
+    visibility: visible;
+  }
+  .receipt-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: none;
   }
 }

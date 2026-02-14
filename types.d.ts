@@ -21,6 +21,7 @@ interface BorrowedBook extends Book {
   isLoanedBook: true;
   dueDate?: string;
   daysLeft?: number;
+  borrowRecordId?: string;
 }
 
 interface AuthCredentials {
@@ -47,4 +48,16 @@ interface BookParams {
 interface BorrowBookParams {
   bookId: string;
   userId: string;
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id?: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      isGuest?: boolean;
+    };
+  }
 }

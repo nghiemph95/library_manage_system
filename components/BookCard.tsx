@@ -1,10 +1,16 @@
 import React from "react";
 import Link from "next/link";
 import BookCover from "@/components/BookCover";
+import WishlistButton from "@/components/WishlistButton";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import dayjs from "dayjs";
+
+interface BookCardProps extends Book {
+  userId?: string;
+  inWishlist?: boolean;
+}
 
 const BookCard = ({
   id,
@@ -15,18 +21,39 @@ const BookCard = ({
   isLoanedBook = false,
   daysLeft,
   dueDate,
-}: Book) => (
+  borrowRecordId,
+  availableCopies,
+  totalCopies,
+  userId,
+  inWishlist = false,
+}: BookCardProps) => (
   <li className={cn(isLoanedBook && "xs:w-52 w-full")}>
-    <Link
-      href={`/books/${id}`}
-      className={cn(isLoanedBook && "w-full flex flex-col items-center")}
+    <div
+      className={cn(
+        isLoanedBook && "w-full flex flex-col items-center",
+        !isLoanedBook && "relative"
+      )}
     >
-      <BookCover coverColor={coverColor} coverImage={coverUrl} />
-
-      <div className={cn("mt-4", !isLoanedBook && "xs:max-w-40 max-w-28")}>
-        <p className="book-title">{title}</p>
-        <p className="book-genre">{genre}</p>
-      </div>
+      {userId && !isLoanedBook && (
+        <div className="absolute right-0 top-0 z-10">
+          <WishlistButton
+            bookId={id}
+            userId={userId}
+            initialInWishlist={inWishlist}
+            size="sm"
+          />
+        </div>
+      )}
+      <Link
+        href={`/books/${id}`}
+        className={cn(!isLoanedBook && "block")}
+      >
+        <BookCover coverColor={coverColor} coverImage={coverUrl} />
+        <div className={cn("mt-4", !isLoanedBook && "xs:max-w-40 max-w-28")}>
+          <p className="book-title">{title}</p>
+          <p className="book-genre">{genre}</p>
+        </div>
+      </Link>
 
       {isLoanedBook && (
         <div className="mt-3 w-full space-y-2">
@@ -55,11 +82,26 @@ const BookCard = ({
               </p>
             )}
           </div>
-
-          <Button className="book-btn">Download receipt</Button>
+          {borrowRecordId ? (
+            <Link href={`/books/${id}/receipt?recordId=${borrowRecordId}`}>
+              <Button className="book-btn w-full">Download receipt</Button>
+            </Link>
+          ) : (
+            <Button className="book-btn w-full" disabled>Download receipt</Button>
+          )}
         </div>
       )}
-    </Link>
+
+      {!isLoanedBook && totalCopies !== undefined && (
+        <div className="mt-1">
+          {availableCopies === 0 ? (
+            <span className="rounded bg-rose-500/20 px-2 py-0.5 text-xs text-rose-400">Out of stock</span>
+          ) : availableCopies <= 2 ? (
+            <span className="rounded bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">{availableCopies} left</span>
+          ) : null}
+        </div>
+      )}
+    </div>
   </li>
 );
 

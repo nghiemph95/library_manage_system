@@ -112,4 +112,51 @@ const seedAdmin = async () => {
   console.log("You can now sign in with these credentials.");
 };
 
-seedAdmin().catch(console.error);
+const GUEST_PLACEHOLDER_CARD = "/ids/admin-placeholder.png";
+
+const seedGuest = async () => {
+  const email = process.env.GUEST_EMAIL;
+  const password = process.env.GUEST_PASSWORD;
+
+  if (!email || !password) {
+    console.log("GUEST_EMAIL / GUEST_PASSWORD not set — skipping guest user seed.");
+    return;
+  }
+
+  const plainPassword = password.trim();
+  const hashedPassword = await hash(plainPassword, 10);
+
+  const [existing] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+
+  if (existing) {
+    await db
+      .update(users)
+      .set({ password: hashedPassword })
+      .where(eq(users.id, existing.id));
+    console.log(`Guest user already exists: password updated for ${email}`);
+    return;
+  }
+
+  await db.insert(users).values({
+    fullName: "Guest User",
+    email,
+    universityId: 999999,
+    password: hashedPassword,
+    universityCard: GUEST_PLACEHOLDER_CARD,
+    status: "APPROVED",
+    role: "USER",
+  });
+
+  console.log(`Guest user created: ${email}`);
+};
+
+const main = async () => {
+  await seedAdmin();
+  await seedGuest();
+};
+
+main().catch(console.error);

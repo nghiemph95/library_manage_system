@@ -3,7 +3,7 @@
 import React from "react";
 import AuthForm from "@/components/AuthForm";
 import { signInSchema } from "@/lib/validations";
-import { signInWithCredentials } from "@/lib/actions/auth";
+import { signInWithCredentials, signInAsGuest } from "@/lib/actions/auth";
 
 const Page = () => (
   <AuthForm
@@ -14,6 +14,7 @@ const Page = () => (
       password: "",
     }}
     onSubmit={signInWithCredentials}
+    onGuestLogin={signInAsGuest}
   />
 );
 

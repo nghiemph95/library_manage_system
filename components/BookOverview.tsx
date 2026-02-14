@@ -2,12 +2,18 @@ import React from "react";
 import Image from "next/image";
 import BookCover from "@/components/BookCover";
 import BorrowBook from "@/components/BorrowBook";
+import NotifyMeButton from "@/components/NotifyMeButton";
+import WishlistButton from "@/components/WishlistButton";
+import ShareBookButton from "@/components/ShareBookButton";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
 import { eq } from "drizzle-orm";
+import config from "@/lib/config";
 
 interface Props extends Book {
   userId: string;
+  onWaitlist?: boolean;
+  inWishlist?: boolean;
 }
 const BookOverview = async ({
   title,
@@ -21,6 +27,8 @@ const BookOverview = async ({
   coverUrl,
   id,
   userId,
+  onWaitlist = false,
+  inWishlist = false,
 }: Props) => {
   // Fetch the user from the database
   const [user] = await db
@@ -29,14 +37,19 @@ const BookOverview = async ({
     .where(eq(users.id, userId))
     .limit(1);
 
-  // Admin can always borrow; other users need APPROVED status
+  const isGuest =
+    !!config.env.guestEmail && user?.email === config.env.guestEmail;
+
+  // Admin can always borrow; other users need APPROVED status; guest cannot borrow
   const canBorrow =
     availableCopies > 0 &&
+    !isGuest &&
     (user?.role === "ADMIN" || user?.status === "APPROVED");
   const borrowingEligibility = {
     isEligible: canBorrow,
-    message:
-      availableCopies <= 0
+    message: isGuest
+      ? "Sign in with a real account to borrow books"
+      : availableCopies <= 0
         ? "Book is not available"
         : "You are not eligible to borrow this book",
   };
@@ -73,13 +86,32 @@ const BookOverview = async ({
 
         <p className="book-description">{description}</p>
 
-        {user && (
-          <BorrowBook
-            bookId={id}
-            userId={userId}
-            borrowingEligibility={borrowingEligibility}
-          />
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {user && (
+            <BorrowBook
+              bookId={id}
+              userId={userId}
+              isGuest={isGuest}
+              borrowingEligibility={borrowingEligibility}
+            />
+          )}
+          {userId && availableCopies === 0 && (
+            <NotifyMeButton
+              bookId={id}
+              userId={userId}
+              initialOnList={onWaitlist}
+            />
+          )}
+          {userId && (
+            <WishlistButton
+              bookId={id}
+              userId={userId}
+              initialInWishlist={inWishlist}
+              variant="button"
+            />
+          )}
+          <ShareBookButton title={title} bookId={id} />
+        </div>
       </div>
 
       <div className="relative flex flex-1 justify-center">

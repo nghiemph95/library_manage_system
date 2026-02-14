@@ -11,6 +11,37 @@ import { redirect } from "next/navigation";
 import { workflowClient } from "@/lib/workflow";
 import config from "@/lib/config";
 
+export const signInAsGuest = async () => {
+  const email = process.env.GUEST_EMAIL;
+  const password = process.env.GUEST_PASSWORD;
+
+  if (!email || !password) {
+    return { success: false, error: "Guest login is not configured." };
+  }
+
+  const ip = (await headers()).get("x-forwarded-for") || "127.0.0.1";
+  const { success } = await ratelimit.limit(ip);
+
+  if (!success) return redirect("/too-fast");
+
+  try {
+    const result = await signIn("credentials", {
+      email,
+      password: password.trim(),
+      redirect: false,
+    });
+
+    if (result?.error) {
+      return { success: false, error: result.error };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.log(error, "Guest signin error");
+    return { success: false, error: "Guest signin error" };
+  }
+};
+
 export const signInWithCredentials = async (
   params: Pick<AuthCredentials, "email" | "password">
 ) => {

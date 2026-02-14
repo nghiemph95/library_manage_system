@@ -7,6 +7,7 @@ import {
   date,
   pgEnum,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 
 export const STATUS_ENUM = pgEnum("status", [
@@ -65,5 +66,48 @@ export const borrowRecords = pgTable("borrow_records", {
   dueDate: date("due_date").notNull(),
   returnDate: date("return_date"),
   status: BORROW_STATUS_ENUM("status").default("BORROWED").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const waitlist = pgTable(
+  "waitlist",
+  {
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+    bookId: uuid("book_id")
+      .references(() => books.id)
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (t) => ({ waitlistUserBook: unique().on(t.userId, t.bookId) })
+);
+
+export const wishlists = pgTable(
+  "wishlists",
+  {
+    id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+    bookId: uuid("book_id")
+      .references(() => books.id)
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  },
+  (t) => ({ wishlistUserBook: unique().on(t.userId, t.bookId) })
+);
+
+export const reviews = pgTable("reviews", {
+  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
+  bookId: uuid("book_id")
+    .references(() => books.id)
+    .notNull(),
+  rating: integer("rating").notNull(),
+  comment: text("comment"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

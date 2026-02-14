@@ -6,10 +6,12 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 import { borrowBook } from "@/lib/actions/book";
+import GuestRestrictDialog from "@/components/GuestRestrictDialog";
 
 interface Props {
   userId: string;
   bookId: string;
+  isGuest?: boolean;
   borrowingEligibility: {
     isEligible: boolean;
     message: string;
@@ -19,18 +21,26 @@ interface Props {
 const BorrowBook = ({
   userId,
   bookId,
+  isGuest = false,
   borrowingEligibility: { isEligible, message },
 }: Props) => {
   const router = useRouter();
   const [borrowing, setBorrowing] = useState(false);
+  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
 
   const handleBorrowBook = async () => {
+    if (isGuest) {
+      setGuestDialogOpen(true);
+      return;
+    }
+
     if (!isEligible) {
       toast({
         title: "Error",
         description: message,
         variant: "destructive",
       });
+      return;
     }
 
     setBorrowing(true);
@@ -64,16 +74,25 @@ const BorrowBook = ({
   };
 
   return (
-    <Button
-      className="book-overview_btn"
-      onClick={handleBorrowBook}
-      disabled={borrowing}
-    >
-      <Image src="/icons/book.svg" alt="book" width={20} height={20} />
-      <p className="font-bebas-neue text-xl text-dark-100">
-        {borrowing ? "Borrowing ..." : "Borrow Book"}
-      </p>
-    </Button>
+    <>
+      <Button
+        className="book-overview_btn"
+        onClick={handleBorrowBook}
+        disabled={borrowing}
+      >
+        <Image src="/icons/book.svg" alt="book" width={20} height={20} />
+        <p className="font-bebas-neue text-xl text-dark-100">
+          {borrowing ? "Borrowing ..." : "Borrow Book"}
+        </p>
+      </Button>
+
+      <GuestRestrictDialog
+        open={guestDialogOpen}
+        onClose={() => setGuestDialogOpen(false)}
+        title="Guest account"
+        description="You're browsing as a guest. To borrow books, please sign out and sign in with a real account."
+      />
+    </>
   );
 };
 export default BorrowBook;

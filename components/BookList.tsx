@@ -6,6 +6,8 @@ interface Props {
   books: Book[];
   containerClassName?: string;
   showAsLoaned?: boolean;
+  wishlistBookIds?: string[];
+  userId?: string;
 }
 
 const BookList = ({
@@ -13,6 +15,8 @@ const BookList = ({
   books,
   containerClassName,
   showAsLoaned,
+  wishlistBookIds = [],
+  userId,
 }: Props) => {
   if (books.length === 0) return null;
   if (books.length === 1 && !showAsLoaned) return null;
@@ -25,7 +29,12 @@ const BookList = ({
 
       <ul className={showAsLoaned ? "book-list mt-8" : "book-list"}>
         {books.map((book) => (
-          <BookCard key={book.id} {...book} />
+          <BookCard
+            key={book.id}
+            {...book}
+            userId={userId}
+            inWishlist={userId ? wishlistBookIds.includes(book.id) : undefined}
+          />
         ))}
       </ul>
     </section>
