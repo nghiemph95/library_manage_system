@@ -6,33 +6,28 @@ import { books, borrowRecords } from "@/database/schema";
 import { desc, ilike, or, and, eq, sql, inArray } from "drizzle-orm";
 import { Suspense } from "react";
 import { auth } from "@/auth";
-import { getWishlistBookIds } from "@/lib/actions/book";
+import {
+  getWishlistBookIds,
+  getBooksFilteredPaginated,
+  type LibrarySort,
+} from "@/lib/actions/book";
+import EmptyState from "@/components/EmptyState";
+import EmptyBooksIllustration from "@/components/illustrations/EmptyBooks";
+import Pagination from "@/components/Pagination";
+import { LIBRARY_PAGE_SIZE } from "@/constants";
 
 interface Props {
-  searchParams: Promise<{ search?: string; genre?: string }>;
+  searchParams: Promise<{ search?: string; genre?: string; sort?: string; page?: string }>;
 }
 
 const LibraryPage = async ({ searchParams }: Props) => {
   const params = await searchParams;
   const search = params.search?.trim() ?? "";
   const genre = params.genre ?? "";
+  const sort = (params.sort ?? "newest") as LibrarySort;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
   const session = await auth();
   const userId = session?.user?.id ?? undefined;
-
-  const conditions = [];
-  if (search) {
-    const pattern = `%${search}%`;
-    conditions.push(or(ilike(books.title, pattern), ilike(books.author, pattern))!);
-  }
-  if (genre) {
-    conditions.push(eq(books.genre, genre));
-  }
-
-  const filteredBooks = (await db
-    .select()
-    .from(books)
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(books.createdAt))) as Book[];
 
   const genresResult = await db
     .selectDistinct({ genre: books.genre })
@@ -69,6 +64,16 @@ const LibraryPage = async ({ searchParams }: Props) => {
     }
   }
 
+  const { books: filteredBooks, total } = await getBooksFilteredPaginated({
+    search,
+    genre,
+    sort,
+    page,
+    pageSize: LIBRARY_PAGE_SIZE,
+  });
+
+  const totalPages = Math.max(1, Math.ceil(total / LIBRARY_PAGE_SIZE));
+
   return (
     <section>
       <h1 className="font-bebas-neue text-4xl text-light-100">Library</h1>
@@ -79,7 +84,9 @@ const LibraryPage = async ({ searchParams }: Props) => {
 
       {showHighlights && newArrivals.length > 0 && (
         <div className="mt-10">
-          <h2 className="font-bebas-neue text-2xl text-light-100">New arrivals</h2>
+          <h2 className="dashboard-section-title flex items-center gap-2 border-l-4 border-primary pl-3 font-bebas-neue text-2xl text-light-100">
+            New arrivals
+          </h2>
           <BookList
             books={newArrivals}
             containerClassName="mt-4"
@@ -91,7 +98,9 @@ const LibraryPage = async ({ searchParams }: Props) => {
 
       {showHighlights && trendingBooks.length > 0 && (
         <div className="mt-10">
-          <h2 className="font-bebas-neue text-2xl text-light-100">Popular</h2>
+          <h2 className="dashboard-section-title flex items-center gap-2 border-l-4 border-primary pl-3 font-bebas-neue text-2xl text-light-100">
+            Popular
+          </h2>
           <BookList
             books={trendingBooks}
             containerClassName="mt-4"
@@ -101,35 +110,50 @@ const LibraryPage = async ({ searchParams }: Props) => {
         </div>
       )}
 
-      {filteredBooks.length === 0 ? (
-        search || genre ? (
-          <p className="mt-6 text-light-200">
-            No books found. Try adjusting your search or filter.
-          </p>
-        ) : null
-      ) : (
-        <div className={showHighlights ? "mt-10" : "mt-8"}>
-          {showHighlights && <h2 className="font-bebas-neue text-2xl text-light-100">All books</h2>}
-          {filteredBooks.length === 1 ? (
-            <ul className="book-list mt-4">
-              <BookCard
-                key={filteredBooks[0].id}
-                {...filteredBooks[0]}
-                userId={userId}
-                inWishlist={userId ? wishlistBookIds.includes(filteredBooks[0].id) : undefined}
-              />
-            </ul>
-          ) : (
-            <BookList
-              title=""
-              books={filteredBooks}
-              containerClassName={showHighlights ? "mt-4" : ""}
-              wishlistBookIds={wishlistBookIds}
-              userId={userId}
+      <div className={showHighlights ? "mt-10" : "mt-8"}>
+        {showHighlights && (
+          <h2 className="dashboard-section-title flex items-center gap-2 border-l-4 border-primary pl-3 font-bebas-neue text-2xl text-light-100">
+            All books
+          </h2>
+        )}
+        {filteredBooks.length === 0 ? (
+          (search || genre || sort !== "newest" || page > 1) ? (
+            <EmptyState
+              illustration={<EmptyBooksIllustration className="text-primary/50" />}
+              title="No books found"
+              description="Try different keywords, genres, or clear filters."
+              actionHref="/library"
+              actionLabel="Clear filters"
             />
-          )}
-        </div>
-      )}
+          ) : null
+        ) : (
+          <>
+            {filteredBooks.length === 1 ? (
+              <ul className="book-list mt-4">
+                <BookCard
+                  key={filteredBooks[0].id}
+                  {...filteredBooks[0]}
+                  userId={userId}
+                  inWishlist={userId ? wishlistBookIds.includes(filteredBooks[0].id) : undefined}
+                />
+              </ul>
+            ) : (
+              <BookList
+                title=""
+                books={filteredBooks}
+                containerClassName={showHighlights ? "mt-4" : ""}
+                wishlistBookIds={wishlistBookIds}
+                userId={userId}
+              />
+            )}
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              basePath="/library"
+            />
+          </>
+        )}
+      </div>
     </section>
   );
 };

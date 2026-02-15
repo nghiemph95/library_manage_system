@@ -59,27 +59,35 @@ const BookCard = ({
       {isLoanedBook && (
         <div className="mt-3 w-full space-y-2">
           <div className="flex flex-col gap-0.5">
-            <div className="book-loaned">
-              <Image
-                src="/icons/calendar.svg"
-                alt="calendar"
-                width={18}
-                height={18}
-                className="object-contain"
-              />
-              <p className="text-light-100">
-                {daysLeft !== undefined
-                  ? daysLeft === 0
-                    ? "Due today"
-                    : daysLeft === 1
-                      ? "1 day left to return"
-                      : `${daysLeft} days left to return`
-                  : "11 days left to return"}
-              </p>
+            <div
+              className={`book-loaned rounded-lg px-2 py-1 ${
+                daysLeft !== undefined && daysLeft <= 7
+                  ? "bg-amber-500/20 text-amber-200"
+                  : "bg-dark-300/60 text-light-100"
+              }`}
+            >
+              <div className="flex items-center gap-1.5">
+                <Image
+                  src="/icons/calendar.svg"
+                  alt="calendar"
+                  width={18}
+                  height={18}
+                  className="object-contain"
+                />
+                <span className="font-medium">
+                  {daysLeft !== undefined
+                    ? daysLeft === 0
+                      ? "Due today"
+                      : daysLeft === 1
+                        ? "1 day left"
+                        : `${daysLeft} days left`
+                    : "—"}
+                </span>
+              </div>
             </div>
             {dueDate && (
-              <p className="pl-6 text-xs text-light-500">
-                Due date: {dayjs(dueDate).format("D MMM YYYY")}
+              <p className="pl-1 text-xs text-light-500">
+                Due: {dayjs(dueDate).format("D MMM YYYY")}
               </p>
             )}
           </div>

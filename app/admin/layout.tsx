@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import "@/styles/admin.css";
 import Sidebar from "@/components/admin/Sidebar";
 import Header from "@/components/admin/Header";
+import AdminFooter from "@/components/admin/AdminFooter";
 import AdminPageTransition from "@/components/admin/AdminPageTransition";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
@@ -35,9 +36,12 @@ const Layout = async ({ children }: { children: ReactNode }) => {
     <main className="flex min-h-screen w-full flex-row">
       <Sidebar session={session} pendingRequestsCount={pendingRequestsCount} />
 
-      <div className="admin-container">
+      <div className="admin-container flex min-h-screen flex-col">
         <Header session={session} />
-        <AdminPageTransition>{children}</AdminPageTransition>
+        <div className="flex-1 pb-24">
+          <AdminPageTransition>{children}</AdminPageTransition>
+        </div>
+        <AdminFooter />
       </div>
     </main>
   );

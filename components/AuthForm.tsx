@@ -135,7 +135,7 @@ const AuthForm = <T extends FieldValues>({
           >
             {form.formState.isSubmitting ? (
               <>
-                <Loader2 className="size-5 animate-spin" aria-hidden />
+                <Loader2 className="btn-loading-spinner size-5" aria-hidden />
                 {isSignIn ? "Signing in..." : "Creating account..."}
               </>
             ) : isSignIn ? (
@@ -187,7 +187,7 @@ const AuthForm = <T extends FieldValues>({
             >
               {guestLoading ? (
                 <>
-                  <Loader2 className="size-5 animate-spin" aria-hidden />
+                  <Loader2 className="btn-loading-spinner size-5" aria-hidden />
                   Continuing as guest...
                 </>
               ) : (

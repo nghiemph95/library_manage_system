@@ -2,6 +2,31 @@
 export const ADMIN_DEMO_CREDENTIALS_LINK =
   "https://www.linkedin.com/in/nghiem-pham-b04868143/overlay/1770999004551/single-media-viewer/?profileId=ACoAACLVMjQBnP5RnQVBorJP4HoqAmwQ1rzta3U";
 
+/** Footer / reference */
+export const FOOTER = {
+  version: "0.1.0",
+  creatorName: "Nghiem Pham",
+  creatorLinkedIn: "https://www.linkedin.com/in/nghiem-pham-b04868143/",
+  creatorGitHub: "", // optional: add repo URL to show "View source"
+  tagline: "Portfolio project · University library management demo",
+  techStack: ["Next.js 15", "React 19", "Drizzle ORM", "NextAuth", "Tailwind CSS"],
+  /** Backend & serverless tech for footer reference */
+  backendServerless: [
+    "Next.js Server Actions",
+    "Neon (Serverless Postgres)",
+    "Upstash Redis",
+    "Vercel",
+  ],
+} as const;
+
+/** Library list: page size and sort options for URL params */
+export const LIBRARY_PAGE_SIZE = 12;
+export const LIBRARY_SORT_OPTIONS = [
+  { value: "newest", label: "Newest" },
+  { value: "popular", label: "Popular" },
+  { value: "title", label: "Title A–Z" },
+] as const;
+
 export const navigationLinks = [
   {
     href: "/library",

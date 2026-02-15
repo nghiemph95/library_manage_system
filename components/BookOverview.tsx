@@ -1,10 +1,12 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import BookCover from "@/components/BookCover";
 import BorrowBook from "@/components/BorrowBook";
 import NotifyMeButton from "@/components/NotifyMeButton";
 import WishlistButton from "@/components/WishlistButton";
 import ShareBookButton from "@/components/ShareBookButton";
+import { Button } from "@/components/ui/button";
 import { db } from "@/database/drizzle";
 import { users } from "@/database/schema";
 import { eq } from "drizzle-orm";
@@ -14,6 +16,8 @@ interface Props extends Book {
   userId: string;
   onWaitlist?: boolean;
   inWishlist?: boolean;
+  currentBorrowRecordId?: string;
+  averageRating?: { average: number; count: number } | null;
 }
 const BookOverview = async ({
   title,
@@ -29,6 +33,8 @@ const BookOverview = async ({
   userId,
   onWaitlist = false,
   inWishlist = false,
+  currentBorrowRecordId,
+  averageRating,
 }: Props) => {
   // Fetch the user from the database
   const [user] = await db
@@ -68,9 +74,13 @@ const BookOverview = async ({
             <span className="font-semibold text-light-200">{genre}</span>
           </p>
 
-          <div className="flex flex-row gap-1">
+          <div className="flex flex-row flex-wrap items-center gap-1">
             <Image src="/icons/star.svg" alt="star" width={22} height={22} />
-            <p>{rating}</p>
+            <p>
+              {averageRating && averageRating.count > 0
+                ? `${averageRating.average} (${averageRating.count} review${averageRating.count === 1 ? "" : "s"})`
+                : rating}
+            </p>
           </div>
         </div>
 
@@ -94,6 +104,13 @@ const BookOverview = async ({
               isGuest={isGuest}
               borrowingEligibility={borrowingEligibility}
             />
+          )}
+          {userId && currentBorrowRecordId && (
+            <Link href={`/books/${id}/receipt?recordId=${currentBorrowRecordId}`}>
+              <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10">
+                Download receipt
+              </Button>
+            </Link>
           )}
           {userId && availableCopies === 0 && (
             <NotifyMeButton

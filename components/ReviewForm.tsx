@@ -76,7 +76,7 @@ export default function ReviewForm({
         />
       </div>
       <Button type="submit" disabled={loading} size="sm">
-        {loading ? <Loader2 className="size-4 animate-spin" /> : "Submit review"}
+        {loading ? <Loader2 className="btn-loading-spinner size-4" /> : "Submit review"}
       </Button>
     </form>
   );

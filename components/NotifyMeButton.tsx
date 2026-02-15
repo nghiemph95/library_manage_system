@@ -57,7 +57,7 @@ export default function NotifyMeButton({
       disabled={loading}
     >
       {loading ? (
-        <Loader2 className="size-4 animate-spin" />
+        <Loader2 className="btn-loading-spinner size-4" />
       ) : (
         <>
           <Bell className="mr-2 size-4" />

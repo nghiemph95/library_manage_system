@@ -9,7 +9,7 @@ import {
   wishlists,
   reviews,
 } from "@/database/schema";
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, asc, sql, inArray, or, ilike, lte } from "drizzle-orm";
 import dayjs from "dayjs";
 
 const GUEST_EMAIL = process.env.GUEST_EMAIL;
@@ -148,6 +148,62 @@ export const getBorrowedBooks = async (
       borrowRecordId: recordId,
     } as BorrowedBook;
   });
+};
+
+export type LibrarySort = "newest" | "popular" | "title";
+
+export const getBooksFilteredPaginated = async (params: {
+  search?: string;
+  genre?: string;
+  sort?: LibrarySort;
+  page?: number;
+  pageSize?: number;
+}): Promise<{ books: Book[]; total: number }> => {
+  const { search = "", genre = "", sort = "newest", page = 1, pageSize = 12 } = params;
+  const conditions = [];
+  if (search.trim()) {
+    const pattern = `%${search.trim()}%`;
+    conditions.push(or(ilike(books.title, pattern), ilike(books.author, pattern))!);
+  }
+  if (genre) {
+    conditions.push(eq(books.genre, genre));
+  }
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const totalResult = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(books)
+    .where(whereClause);
+  const total = totalResult[0]?.count ?? 0;
+
+  const offset = (page - 1) * pageSize;
+  let orderByClause = desc(books.createdAt);
+  if (sort === "title") {
+    orderByClause = asc(books.title);
+  }
+  if (sort === "popular") {
+    const rows = await db
+      .select()
+      .from(books)
+      .where(whereClause)
+      .orderBy(
+        desc(
+          sql`(SELECT count(*)::int FROM borrow_records WHERE borrow_records.book_id = ${books.id})`
+        )
+      )
+      .limit(pageSize)
+      .offset(offset);
+    return { books: rows as Book[], total };
+  }
+
+  const rows = await db
+    .select()
+    .from(books)
+    .where(whereClause)
+    .orderBy(orderByClause)
+    .limit(pageSize)
+    .offset(offset);
+  return { books: rows as Book[], total };
 };
 
 export const getNewArrivals = async (limit: number): Promise<Book[]> => {
@@ -339,6 +395,71 @@ export type ReviewWithUser = {
   comment: string | null;
   createdAt: Date | null;
   userName: string | null;
+};
+
+/** For cron: borrow records due in 1 day or overdue, with user email and book title. */
+export const getBorrowReminderCandidates = async (): Promise<
+  { recordId: string; userEmail: string; userName: string; bookTitle: string; dueDate: string }[]
+> => {
+  const tomorrow = dayjs().add(1, "day").format("YYYY-MM-DD");
+  const rows = await db
+    .select({
+      recordId: borrowRecords.id,
+      userEmail: users.email,
+      userName: users.fullName,
+      bookTitle: books.title,
+      dueDate: borrowRecords.dueDate,
+    })
+    .from(borrowRecords)
+    .innerJoin(books, eq(borrowRecords.bookId, books.id))
+    .innerJoin(users, eq(borrowRecords.userId, users.id))
+    .where(
+      and(
+        eq(borrowRecords.status, "BORROWED"),
+        lte(borrowRecords.dueDate, tomorrow)
+      )
+    );
+  return rows.map((r) => ({
+    recordId: r.recordId,
+    userEmail: r.userEmail,
+    userName: r.userName,
+    bookTitle: r.bookTitle,
+    dueDate: r.dueDate,
+  }));
+};
+
+/** Returns current borrow record id if user has this book borrowed (for receipt link). */
+export const getCurrentBorrowRecordId = async (
+  userId: string,
+  bookId: string
+): Promise<string | null> => {
+  const [row] = await db
+    .select({ id: borrowRecords.id })
+    .from(borrowRecords)
+    .where(
+      and(
+        eq(borrowRecords.userId, userId),
+        eq(borrowRecords.bookId, bookId),
+        eq(borrowRecords.status, "BORROWED")
+      )
+    )
+    .limit(1);
+  return row?.id ?? null;
+};
+
+export const getAverageRatingForBook = async (
+  bookId: string
+): Promise<{ average: number; count: number } | null> => {
+  const [row] = await db
+    .select({
+      average: sql<number>`coalesce(round(avg(${reviews.rating})::numeric, 1), 0)`,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(reviews)
+    .where(eq(reviews.bookId, bookId))
+    .groupBy(reviews.bookId);
+  if (!row || row.count === 0) return null;
+  return { average: Number(row.average), count: row.count };
 };
 
 export const getReviewsForBook = async (

@@ -31,9 +31,10 @@ const Home = async ({ searchParams }: HomeProps) => {
 
   const borrowingCount = borrowedAll.length;
   const wishlistCount = wishlistBookIds.length;
-  const dueSoonCount = borrowedAll.filter(
+  const dueSoonBooks = borrowedAll.filter(
     (b) => b.daysLeft !== undefined && b.daysLeft <= 7
-  ).length;
+  );
+  const dueSoonCount = dueSoonBooks.length;
   const borrowedBooks = borrowedAll.slice(0, 3);
 
   const displayName =
@@ -58,10 +59,35 @@ const Home = async ({ searchParams }: HomeProps) => {
           </>
         )}
 
+        {userId && dueSoonBooks.length > 0 && (
+          <section className="mt-10">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="dashboard-section-title flex items-center gap-2 border-l-4 border-amber-500/80 pl-3 text-amber-200/90">
+                Return soon
+              </h2>
+              <Link href="/my-profile" className="dashboard-section-link">
+                View all
+              </Link>
+            </div>
+            <ul className="book-list mt-4">
+              {dueSoonBooks.slice(0, 3).map((book) => (
+                <BookCard
+                  key={book.id}
+                  {...book}
+                  userId={userId}
+                  inWishlist={wishlistBookIds.includes(book.id)}
+                />
+              ))}
+            </ul>
+          </section>
+        )}
+
         {userId && borrowedBooks.length > 0 && (
           <section className="mt-10">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="dashboard-section-title">Your borrowed books</h2>
+              <h2 className="dashboard-section-title flex items-center gap-2 border-l-4 border-primary pl-3">
+                Your borrowed books
+              </h2>
               <Link href="/my-profile" className="dashboard-section-link">
                 View all
               </Link>
@@ -81,7 +107,9 @@ const Home = async ({ searchParams }: HomeProps) => {
 
         <section className="mt-10">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="dashboard-section-title">New arrivals</h2>
+            <h2 className="dashboard-section-title flex items-center gap-2 border-l-4 border-primary pl-3">
+              New arrivals
+            </h2>
             <Link href="/library" className="dashboard-section-link">
               See all
             </Link>
@@ -104,7 +132,9 @@ const Home = async ({ searchParams }: HomeProps) => {
 
         <section className="mt-10">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="dashboard-section-title">Popular</h2>
+            <h2 className="dashboard-section-title flex items-center gap-2 border-l-4 border-primary pl-3">
+              Popular
+            </h2>
             <Link href="/library" className="dashboard-section-link">
               See all
             </Link>

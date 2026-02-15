@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { getWishlistBooks } from "@/lib/actions/book";
 import BookList from "@/components/BookList";
 import BookCard from "@/components/BookCard";
-import Link from "next/link";
+import EmptyState from "@/components/EmptyState";
+import EmptyWishlistIllustration from "@/components/illustrations/EmptyWishlist";
 
 export default async function WishlistPage() {
   const session = await auth();
@@ -15,15 +16,20 @@ export default async function WishlistPage() {
 
   return (
     <section>
-      <h1 className="font-bebas-neue text-4xl text-light-100">My Wishlist</h1>
+      <h1 className="font-bebas-neue text-4xl text-light-100">
+        My Wishlist
+        {wishlistBooks.length > 0 && (
+          <span className="ml-2 text-2xl text-light-200">({wishlistBooks.length} books)</span>
+        )}
+      </h1>
       {wishlistBooks.length === 0 ? (
-        <p className="mt-6 text-light-200">
-          You haven&apos;t added any books to your wishlist. Browse the{" "}
-          <Link href="/library" className="text-primary underline">
-            Library
-          </Link>{" "}
-          and click the heart on a book to add it.
-        </p>
+        <EmptyState
+          illustration={<EmptyWishlistIllustration className="text-primary/40" />}
+          title="No books in wishlist"
+          description="Browse the library and click the heart on a book to add it here."
+          actionHref="/library"
+          actionLabel="Discover books"
+        />
       ) : wishlistBooks.length === 1 ? (
         <ul className="book-list mt-8">
           <BookCard

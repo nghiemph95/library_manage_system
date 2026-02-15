@@ -60,7 +60,7 @@ export default function WishlistButton({
         aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
       >
         {loading ? (
-          <Loader2 className="size-5 animate-spin" />
+          <Loader2 className="btn-loading-spinner size-5" />
         ) : (
           <Heart
             className={cn("size-5", inWishlist && "fill-current")}
@@ -85,7 +85,7 @@ export default function WishlistButton({
       aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
     >
       {loading ? (
-        <Loader2 className={cn("animate-spin", size === "sm" ? "size-4" : "size-5")} />
+        <Loader2 className={cn("btn-loading-spinner", size === "sm" ? "size-4" : "size-5")} />
       ) : (
         <Heart
           className={cn(size === "sm" ? "size-4" : "size-5", inWishlist && "fill-current")}

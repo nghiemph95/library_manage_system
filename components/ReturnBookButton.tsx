@@ -44,7 +44,7 @@ export default function ReturnBookButton({
         disabled={loading}
       >
         {loading ? (
-          <Loader2 className="animate-spin" />
+          <Loader2 className="btn-loading-spinner size-5" />
         ) : (
           <RotateCcw />
         )}
@@ -61,7 +61,7 @@ export default function ReturnBookButton({
       disabled={loading}
     >
       {loading ? (
-        <Loader2 className="size-5 animate-spin" />
+        <Loader2 className="btn-loading-spinner size-5" />
       ) : (
         <RotateCcw className="size-5" />
       )}

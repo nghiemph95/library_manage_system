@@ -12,7 +12,15 @@ type User = {
   role?: string | null;
 } | undefined;
 
-const Header = ({ session, user }: { session: Session; user?: User }) => {
+const Header = ({
+  session,
+  user,
+  wishlistCount = 0,
+}: {
+  session: Session;
+  user?: User;
+  wishlistCount?: number;
+}) => {
   const isAdmin = user?.role === "ADMIN";
   const avatarUrl =
     user?.universityCard &&
@@ -41,9 +49,15 @@ const Header = ({ session, user }: { session: Session; user?: User }) => {
         <li>
           <Link
             href="/wishlist"
-            className="text-light-200 hover:text-light-100"
+            className="relative inline-block text-light-200 hover:text-light-100"
+            aria-label={wishlistCount > 0 ? `Wishlist (${wishlistCount} books)` : "Wishlist"}
           >
             Wishlist
+            {wishlistCount > 0 && (
+              <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-dark-100">
+                {wishlistCount > 99 ? "99+" : wishlistCount}
+              </span>
+            )}
           </Link>
         </li>
 

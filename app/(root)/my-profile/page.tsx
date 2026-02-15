@@ -12,6 +12,8 @@ import BookCard from "@/components/BookCard";
 import { getBorrowedBooks } from "@/lib/actions/book";
 import { ADMIN_DEMO_CREDENTIALS_LINK } from "@/constants";
 import config from "@/lib/config";
+import EmptyState from "@/components/EmptyState";
+import EmptyBooksIllustration from "@/components/illustrations/EmptyBooks";
 
 interface BorrowHistoryItem {
   book: Book;
@@ -95,13 +97,13 @@ const MyProfilePage = async () => {
         </h2>
 
         {borrowedBooks.length === 0 ? (
-          <p className="mt-6 text-light-200">
-            You haven&apos;t borrowed any books yet. Visit the{" "}
-            <a href="/library" className="text-primary underline">
-              Library
-            </a>{" "}
-            to borrow books.
-          </p>
+          <EmptyState
+            illustration={<EmptyBooksIllustration className="text-primary/50" />}
+            title="No borrowed books"
+            description="Visit the library to borrow books."
+            actionHref="/library"
+            actionLabel="Browse Library"
+          />
         ) : (
           <ul className="book-list mt-8">
             {borrowedBooks.map((book) => (
@@ -113,9 +115,9 @@ const MyProfilePage = async () => {
         )}
       </section>
 
-      {borrowHistory.length > 0 && (
+      {borrowHistory.length > 0 ? (
         <section className="mt-16">
-          <h2 className="font-bebas-neue text-4xl text-light-100">
+          <h2 className="dashboard-section-title flex items-center gap-2 border-l-4 border-primary pl-3 font-bebas-neue text-4xl text-light-100">
             Borrow history
           </h2>
           <p className="mt-1 text-sm text-light-200">
@@ -132,6 +134,19 @@ const MyProfilePage = async () => {
             ))}
           </ul>
         </section>
+      ) : (
+        borrowedBooks.length > 0 && (
+          <section className="mt-16">
+            <h2 className="dashboard-section-title flex items-center gap-2 border-l-4 border-primary pl-3 font-bebas-neue text-4xl text-light-100">
+              Borrow history
+            </h2>
+            <EmptyState
+              illustration={<EmptyBooksIllustration className="text-primary/40" />}
+              title="No history yet"
+              description="Books you return will appear here."
+            />
+          </section>
+        )
       )}
     </>
   );

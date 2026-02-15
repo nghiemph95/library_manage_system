@@ -10,7 +10,7 @@ import BookList from "@/components/BookList";
 import BookCard from "@/components/BookCard";
 import ReviewForm from "@/components/ReviewForm";
 import ReviewList from "@/components/ReviewList";
-import { isOnWaitlist, isInWishlist, getReviewsForBook, getWishlistBookIds } from "@/lib/actions/book";
+import { isOnWaitlist, isInWishlist, getReviewsForBook, getWishlistBookIds, getCurrentBorrowRecordId, getAverageRatingForBook } from "@/lib/actions/book";
 import Link from "next/link";
 
 export async function generateMetadata({
@@ -50,11 +50,13 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
     .limit(6)) as Book[];
 
   const userId = session?.user?.id ?? "";
-  const [onWaitlist, inWishlist, reviewsList, wishlistBookIds] = await Promise.all([
+  const [onWaitlist, inWishlist, reviewsList, wishlistBookIds, currentBorrowRecordId, averageRating] = await Promise.all([
     userId ? isOnWaitlist({ bookId: id, userId }) : false,
     userId ? isInWishlist({ bookId: id, userId }) : false,
     getReviewsForBook(id),
     userId ? getWishlistBookIds(userId) : [] as string[],
+    userId ? getCurrentBorrowRecordId(userId, id) : null,
+    getAverageRatingForBook(id),
   ]);
 
   return (
@@ -72,6 +74,8 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
         userId={userId}
         onWaitlist={onWaitlist}
         inWishlist={inWishlist}
+        currentBorrowRecordId={currentBorrowRecordId ?? undefined}
+        averageRating={averageRating ?? undefined}
       />
 
       <div className="book-details">
