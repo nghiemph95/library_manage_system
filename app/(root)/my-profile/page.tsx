@@ -9,37 +9,9 @@ import { books, borrowRecords } from "@/database/schema";
 import { eq, and, desc } from "drizzle-orm";
 import dayjs from "dayjs";
 import BookCard from "@/components/BookCard";
+import { getBorrowedBooks } from "@/lib/actions/book";
 import { ADMIN_DEMO_CREDENTIALS_LINK } from "@/constants";
 import config from "@/lib/config";
-
-const getBorrowedBooks = async (userId: string): Promise<BorrowedBook[]> => {
-  const records = await db
-    .select({
-      book: books,
-      dueDate: borrowRecords.dueDate,
-      recordId: borrowRecords.id,
-    })
-    .from(borrowRecords)
-    .innerJoin(books, eq(borrowRecords.bookId, books.id))
-    .where(
-      and(
-        eq(borrowRecords.userId, userId),
-        eq(borrowRecords.status, "BORROWED")
-      )
-    );
-
-  return records.map(({ book, dueDate, recordId }) => {
-    const due = dayjs(dueDate);
-    const daysLeft = due.diff(dayjs(), "day");
-    return {
-      ...book,
-      isLoanedBook: true,
-      dueDate: dueDate ?? undefined,
-      daysLeft: daysLeft >= 0 ? daysLeft : 0,
-      borrowRecordId: recordId,
-    } as BorrowedBook;
-  });
-};
 
 interface BorrowHistoryItem {
   book: Book;
@@ -78,7 +50,7 @@ const MyProfilePage = async () => {
 
   const userId = session.user.id;
   const [borrowedBooks, borrowHistory] = await Promise.all([
-    getBorrowedBooks(userId),
+    getBorrowedBooks(userId, 100),
     getBorrowHistory(userId),
   ]);
   const isGuest =

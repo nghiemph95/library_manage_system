@@ -9,7 +9,7 @@ import {
   wishlists,
   reviews,
 } from "@/database/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import dayjs from "dayjs";
 
 const GUEST_EMAIL = process.env.GUEST_EMAIL;
@@ -115,6 +115,67 @@ export const returnBook = async (params: {
     console.log(error);
     return { success: false, error: "Failed to return book." };
   }
+};
+
+export const getBorrowedBooks = async (
+  userId: string,
+  limit?: number
+): Promise<BorrowedBook[]> => {
+  const records = await db
+    .select({
+      book: books,
+      dueDate: borrowRecords.dueDate,
+      recordId: borrowRecords.id,
+    })
+    .from(borrowRecords)
+    .innerJoin(books, eq(borrowRecords.bookId, books.id))
+    .where(
+      and(
+        eq(borrowRecords.userId, userId),
+        eq(borrowRecords.status, "BORROWED")
+      )
+    )
+    .limit(limit ?? 100);
+
+  return records.map(({ book, dueDate, recordId }) => {
+    const due = dayjs(dueDate);
+    const daysLeft = due.diff(dayjs(), "day");
+    return {
+      ...book,
+      isLoanedBook: true,
+      dueDate: dueDate ?? undefined,
+      daysLeft: daysLeft >= 0 ? daysLeft : 0,
+      borrowRecordId: recordId,
+    } as BorrowedBook;
+  });
+};
+
+export const getNewArrivals = async (limit: number): Promise<Book[]> => {
+  const rows = await db
+    .select()
+    .from(books)
+    .orderBy(desc(books.createdAt))
+    .limit(limit);
+  return rows as Book[];
+};
+
+export const getPopularBooks = async (limit: number): Promise<Book[]> => {
+  const popularRows = await db
+    .select({
+      bookId: borrowRecords.bookId,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(borrowRecords)
+    .groupBy(borrowRecords.bookId)
+    .orderBy(desc(sql`count(*)`))
+    .limit(limit);
+  if (popularRows.length === 0) return [];
+  const ids = popularRows.map((r) => r.bookId);
+  const rows = await db
+    .select()
+    .from(books)
+    .where(inArray(books.id, ids));
+  return rows as Book[];
 };
 
 export const addToWaitlist = async (params: {
